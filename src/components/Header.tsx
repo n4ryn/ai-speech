@@ -4,7 +4,7 @@ const Header = () => {
   return (
     <div className="flex justify-between items-center p-4">
       <a href="/" className="font-semibold">
-        Ai<span className="text-blue-400">Speech</span>
+        Ai<span className="text-blue-400/90">Speech</span>
       </a>
       <a
         href="/"

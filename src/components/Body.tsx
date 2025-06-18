@@ -5,7 +5,7 @@ const Body = () => {
   return (
     <div className="p-4 w-full min-h-[calc(100vh-140px)] flex flex-col justify-center items-center gap-4">
       <p className="font-bold text-7xl">
-        Ai<span className="text-blue-400">Speech</span>
+        Ai<span className="text-blue-400/90">Speech</span>
       </p>
       <p className="flex justify-center items-center gap-2 text-lg font-normal text-slate-600">
         Record <RxArrowRight className="text-blue-400" /> Transcribe
