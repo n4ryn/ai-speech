@@ -3,7 +3,7 @@ import { RiDeleteBin2Line } from "react-icons/ri";
 import { RxPlus } from "react-icons/rx";
 
 // Constants
-import { chats } from "../constants/chats";
+import { chats } from "../constants";
 
 const SideBar = () => {
   return (

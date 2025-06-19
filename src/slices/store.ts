@@ -1,10 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 
 import userReducer from "./user.slice";
+import aiModelReducer from "./aiModel.slice";
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
+    aiModel: aiModelReducer,
   },
 });
 
