@@ -9,6 +9,18 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/n4ryn/fe-ai-speech.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/n4ryn/fe-ai-speech/issues"
+  },
+  "homepage": "https://github.com/n4ryn/fe-ai-speech#readme",
+  "description": "",
   "dependencies": {
     "@tailwindcss/vite": "^4.1.10",
     "player.style": "^0.1.9",
