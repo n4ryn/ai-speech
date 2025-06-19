@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { useSelector } from "react-redux";
+
+// Types
+import type { RootState } from "../slices/store";
 
 // Icons
 import { RxArrowRight, RxStop } from "react-icons/rx";
 import { PiMicrophoneLight } from "react-icons/pi";
-import { useNavigate } from "react-router";
 
 const NewChat = () => {
-  const user = null;
   const navigate = useNavigate();
 
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
   const [file, setFile] = useState<File | null>(null);
+  const user = useSelector((state: RootState) => state.user);
 
   // Start Recording
   const handleRecord = () => {
