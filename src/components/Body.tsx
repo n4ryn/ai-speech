@@ -1,42 +1,29 @@
-import { useEffect, useState } from "react";
-import { Outlet, useNavigate } from "react-router";
+import { useEffect } from "react";
+import { Outlet } from "react-router";
 
 // Components
 import Header from "./Header";
 import Footer from "./Footer";
-import SideBar from "./SideBar";
 
 // Utils
 import { getUser } from "../utils/helper.function";
+import useRequireAuth from "../utils/requiredAuth.function";
 
 const Body = () => {
-  const navigate = useNavigate();
-
-  const [isSideBarOpen, setIsSideBarOpen] = useState(false);
   const user = getUser();
+  const requireAuth = useRequireAuth(user);
 
   useEffect(() => {
-    if (!user || !user.name) {
-      navigate("/login");
-    }
-  }, [user]);
+    requireAuth();
+  }, [requireAuth]);
 
   return (
-    <div className="w-full h-screen flex">
-      <SideBar
-        isSideBarOpen={isSideBarOpen}
-        setIsSideBarOpen={setIsSideBarOpen}
-      />
-      <div className="flex-1 flex flex-col">
-        <Header
-          isSideBarOpen={isSideBarOpen}
-          setIsSideBarOpen={setIsSideBarOpen}
-        />
-        <div className="p-4 w-full min-h-[calc(100vh-136px)] overflow-auto">
-          <Outlet />
-        </div>
-        <Footer />
+    <div className="w-full h-screen">
+      <Header />
+      <div className="p-4 min-h-[calc(100vh-140px)] overflow-auto flex justify-center items-center">
+        <Outlet />
       </div>
+      <Footer />
     </div>
   );
 };
