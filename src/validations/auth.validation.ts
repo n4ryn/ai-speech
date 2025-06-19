@@ -56,7 +56,6 @@ export const validateLoginForm = ({
     });
     return true;
   } catch (err) {
-    console.log(err);
     if (err instanceof z.ZodError) {
       const fieldErrors = {
         email: "",
@@ -90,7 +89,6 @@ export const validateSignupForm = ({
     });
     return true;
   } catch (err) {
-    console.log(err);
     if (err instanceof z.ZodError) {
       const fieldErrors = {
         name: "",

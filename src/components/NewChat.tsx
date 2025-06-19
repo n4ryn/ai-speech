@@ -19,7 +19,7 @@ const NewChat = () => {
 
   // Start Recording
   const handleRecord = () => {
-    if (!user) {
+    if (!user.name) {
       navigate("/login");
     }
 
@@ -35,12 +35,11 @@ const NewChat = () => {
 
   // Upload File
   const handleFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user) {
+    if (!user.name) {
       navigate("/login");
     }
 
     const file = event.target.files?.[0];
-    console.log(file);
 
     if (file) {
       setFile(file);
