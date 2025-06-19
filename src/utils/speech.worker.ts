@@ -6,7 +6,10 @@ export const speechRecognition = async (url: string) => {
     "Xenova/whisper-tiny.en"
   );
 
-  const output = await transcriber(url);
+  const output = await transcriber(url, {
+    chunk_length_s: 30,
+    stride_length_s: 5,
+  });
 
   return output;
 };
