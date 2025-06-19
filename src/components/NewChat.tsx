@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import MediaThemeTailwindAudio from "player.style/tailwind-audio/react";
 
 // Components
 import SettingModal from "./SettingModal";
+
+// Types
+import type { RootState } from "../slices/store";
 
 // Utils
 import { convertToMinutes, getUser } from "../utils/helper.function";
@@ -17,6 +21,7 @@ import { RiSettings3Line } from "react-icons/ri";
 const NewChat = () => {
   const user = getUser();
   const requireAuth = useRequireAuth(user);
+  const aiModel = useSelector((state: RootState) => state.aiModel);
 
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -82,7 +87,7 @@ const NewChat = () => {
   const handleTranscribe = async () => {
     if (!fileUrl) return;
 
-    const transcriber = await speechRecognition(fileUrl);
+    const transcriber = await speechRecognition(fileUrl, aiModel);
     console.log(transcriber);
   };
 

@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+
+// Slices
+import { updateAiModel } from "../slices/aiModel.slice";
 
 // Constants
-import { LANGUAGES } from "../constants";
+import { LANGUAGES, AI_MODELS } from "../constants";
 
 function titleCase(str: string): string {
   return str
@@ -11,25 +15,35 @@ function titleCase(str: string): string {
     .join(" ");
 }
 
-type SettingModalProps = {
+interface SettingModalProps {
   ref: React.RefObject<HTMLDialogElement | null>;
-};
+}
+
+interface ModelState {
+  mod: string;
+  lang: string;
+}
 
 const SettingModal = ({ ref }: SettingModalProps) => {
+  const dispatch = useDispatch();
+
   const [quantized, setQuantized] = useState(false);
   const [multilingual, setMultilingual] = useState(false);
-
-  const models: Record<string, number[]> = {
-    "Xenova/whisper-tiny": [41, 152],
-    "Xenova/whisper-base": [77, 291],
-    "Xenova/whisper-small": [249],
-    "Xenova/whisper-medium": [776],
-    "distil-whisper/distil-medium.en": [402],
-    "distil-whisper/distil-large-v2": [767],
-  };
+  const [model, setModel] = useState<ModelState>({ mod: "", lang: "" });
 
   const languageKeys = Object.keys(LANGUAGES);
   const languageNames = Object.values(LANGUAGES).map(titleCase);
+
+  const handleModelChange = () => {
+    if (!model.mod) return;
+
+    const suffix =
+      multilingual || model.mod.startsWith("distil-whisper/") ? "" : ".en";
+
+    const fullModel = model.mod + suffix;
+
+    dispatch(updateAiModel(fullModel));
+  };
 
   return (
     <dialog
@@ -42,13 +56,22 @@ const SettingModal = ({ ref }: SettingModalProps) => {
 
         <fieldset className="fieldset">
           <legend className="fieldset-legend">Select the model to use.</legend>
-          <select defaultValue="" className="select w-full">
-            {Object.keys(models)
-              .filter((key) => quantized || models[key].length === 2)
+          <select
+            defaultValue=""
+            className="select w-full"
+            onChange={(e) =>
+              setModel((prev) => ({ ...prev, mod: e.target.value }))
+            }
+          >
+            <option disabled value="">
+              -- Select a model --
+            </option>
+            {Object.keys(AI_MODELS)
+              .filter((key) => quantized || AI_MODELS[key].length === 2)
               .filter((key) => multilingual || key.startsWith("Xenova/whisper"))
               .map((key) => {
                 const modelSize =
-                  models[key][quantized ? 0 : models[key].length - 1];
+                  AI_MODELS[key][quantized ? 0 : AI_MODELS[key].length - 1];
                 const suffix =
                   multilingual || key.startsWith("distil-whisper/")
                     ? ""
@@ -90,7 +113,16 @@ const SettingModal = ({ ref }: SettingModalProps) => {
               <legend className="fieldset-legend">
                 Select the source language
               </legend>
-              <select defaultValue="" className="select w-full">
+              <select
+                defaultValue=""
+                className="select w-full"
+                onChange={(e) =>
+                  setModel((prev) => ({ ...prev, lang: e.target.value }))
+                }
+              >
+                <option disabled value="">
+                  -- Select a language --
+                </option>
                 {languageKeys.map((key, index) => (
                   <option key={key} value={key}>
                     {languageNames[index]}
@@ -101,9 +133,13 @@ const SettingModal = ({ ref }: SettingModalProps) => {
 
             <fieldset className="fieldset">
               <legend className="fieldset-legend">
-                Select the output mode
+                Select a task to perform
               </legend>
-              <select defaultValue="transcribe" className="select w-full">
+              <select
+                defaultValue="transcribe"
+                className="select w-full"
+                disabled
+              >
                 <option value="transcribe">Transcribe</option>
                 <option value="translate">Translate</option>
               </select>
@@ -113,7 +149,12 @@ const SettingModal = ({ ref }: SettingModalProps) => {
 
         <div className="modal-action">
           <form method="dialog">
-            <button className="btn">Close</button>
+            <button
+              className="btn bg-blue-400/90 hover:shadow-lg hover:shadow-blue-200 text-white"
+              onClick={handleModelChange}
+            >
+              Save
+            </button>
           </form>
         </div>
       </div>
