@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { useSelector } from "react-redux";
 
-// Types
-import type { RootState } from "../slices/store";
+// Utils
+import { getUser } from "../utils/helper.function";
 
 // Icons
 import { RxArrowRight, RxStop } from "react-icons/rx";
@@ -15,11 +14,11 @@ const NewChat = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
   const [file, setFile] = useState<File | null>(null);
-  const user = useSelector((state: RootState) => state.user);
+  const user = getUser();
 
   // Start Recording
   const handleRecord = () => {
-    if (!user) {
+    if (!user || !user.name) {
       navigate("/login");
     }
 
@@ -35,7 +34,7 @@ const NewChat = () => {
 
   // Upload File
   const handleFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user) {
+    if (!user || !user.name) {
       navigate("/login");
     }
 

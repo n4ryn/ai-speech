@@ -1,23 +1,22 @@
 import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router";
-import { useSelector } from "react-redux";
 
 // Components
 import Header from "./Header";
 import Footer from "./Footer";
 import SideBar from "./SideBar";
 
-// Types
-import type { RootState } from "../slices/store";
+// Utils
+import { getUser } from "../utils/helper.function";
 
 const Body = () => {
   const navigate = useNavigate();
 
   const [isSideBarOpen, setIsSideBarOpen] = useState(false);
-  const user = useSelector((state: RootState) => state.user);
+  const user = getUser();
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !user.name) {
       navigate("/login");
     }
   }, [user]);
