@@ -1,5 +1,6 @@
 import { Link } from "react-router";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
 
 // Icons
 import { GoSidebarExpand } from "react-icons/go";
@@ -7,9 +8,27 @@ import { GoSidebarExpand } from "react-icons/go";
 // Types
 import type { RootState } from "../slices/store";
 import type { SideBarType } from "../types/component.types";
+import { removeUser } from "../slices/user.slice";
 
 const Header = ({ isSideBarOpen, setIsSideBarOpen }: SideBarType) => {
+  const dispatch = useDispatch();
+
   const user = useSelector((state: RootState) => state.user);
+
+  const handleLogout = async () => {
+    try {
+      const res = await axios({
+        method: "POST",
+        url: import.meta.env.VITE_BASE_URL + "/logout",
+        withCredentials: true,
+      });
+
+      dispatch(removeUser());
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="flex justify-between items-center p-4 bg-linear-to-b from-blue-200/40 to-blue-100/10">
@@ -48,7 +67,11 @@ const Header = ({ isSideBarOpen, setIsSideBarOpen }: SideBarType) => {
               <a>Settings</a>
             </li> */}
             <li>
-              <Link to="/login" className="hover:bg-blue-100">
+              <Link
+                to="/login"
+                onClick={handleLogout}
+                className="hover:bg-blue-100"
+              >
                 Logout
               </Link>
             </li>

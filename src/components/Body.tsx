@@ -17,7 +17,7 @@ const Body = () => {
   const user = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
-    if (!user) {
+    if (!user.name) {
       navigate("/login");
     }
   }, [user]);
