@@ -1,29 +1,27 @@
-import { useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router";
 
 // Components
 import Body from "./components/Body";
-import Footer from "./components/Footer";
-import Header from "./components/Header";
-import SideBar from "./components/SideBar";
+import Chat from "./components/Chat";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
+import NewChat from "./components/NewChat";
 
 function App() {
-  const [isSideBarOpen, setIsSideBarOpen] = useState(true);
-
   return (
-    <div className="w-full h-screen flex">
-      <SideBar
-        isSideBarOpen={isSideBarOpen}
-        setIsSideBarOpen={setIsSideBarOpen}
-      />
-      <div className="flex-1 flex flex-col">
-        <Header
-          isSideBarOpen={isSideBarOpen}
-          setIsSideBarOpen={setIsSideBarOpen}
-        />
-        <Body />
-        <Footer />
-      </div>
-    </div>
+    <>
+      <BrowserRouter basename="/">
+        <Routes>
+          <Route path="/" element={<Body />}>
+            <Route path="/" element={<NewChat />} />
+            <Route path="/chat/:id" element={<Chat />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+          </Route>
+          <Route path="*" element={<div>Not Found</div>}></Route>
+        </Routes>
+      </BrowserRouter>
+    </>
   );
 }
 
