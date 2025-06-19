@@ -1,71 +1,84 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useCallback, useEffect, useRef, useState } from "react";
+import MediaThemeTailwindAudio from "player.style/tailwind-audio/react";
 
 // Utils
-import { getUser } from "../utils/helper.function";
+import { convertToMinutes, getUser } from "../utils/helper.function";
 
 // Icons
 import { RxArrowRight, RxStop } from "react-icons/rx";
 import { PiMicrophoneLight } from "react-icons/pi";
+import useRequireAuth from "../utils/requiredAuth.function";
 
 const NewChat = () => {
-  const navigate = useNavigate();
+  const user = getUser();
+  const requireAuth = useRequireAuth(user);
 
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
-  const [file, setFile] = useState<File | null>(null);
-  const user = getUser();
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+
+  const mediaStream = useRef<MediaStream | null>(null);
+  const mediaRecorder = useRef<MediaRecorder | null>(null);
+  const chunks = useRef<Blob[]>([]);
 
   // Start Recording
-  const handleRecord = () => {
-    if (!user || !user.name) {
-      navigate("/login");
-    }
+  const handleRecord = useCallback(async () => {
+    if (!requireAuth()) return;
+    setFileUrl(null);
 
-    setIsRecording(true);
-    setFile(null);
-  };
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (!stream) return;
+
+      mediaStream.current = stream;
+
+      const recorder = new MediaRecorder(stream);
+      mediaRecorder.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.current.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks.current, { type: "audio/webm" });
+        setFileUrl(URL.createObjectURL(blob));
+        chunks.current = [];
+      };
+
+      recorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      alert("Please allow microphone access from settings.");
+      console.error(error);
+      setIsRecording(false);
+    }
+  }, [requireAuth]);
 
   // Stop Recording
   const handleStop = () => {
-    setIsRecording(false);
+    if (mediaRecorder.current?.state === "recording") {
+      mediaRecorder.current.stop();
+    }
+    mediaStream.current?.getTracks().forEach((track) => track.stop());
+
     setDuration(0);
+    setIsRecording(false);
   };
 
   // Upload File
   const handleFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user || !user.name) {
-      navigate("/login");
-    }
+    if (!requireAuth()) return;
 
     const file = event.target.files?.[0];
-
-    if (file) {
-      setFile(file);
-    }
-  };
-
-  const convertToMinutes = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${
-      remainingSeconds < 10 ? "0" : ""
-    }${remainingSeconds} min`;
+    if (file) setFileUrl(URL.createObjectURL(file));
   };
 
   useEffect(() => {
-    if (isRecording) {
-      const timer = setInterval(() => {
-        setDuration((prev) => prev + 1);
-      }, 1000);
+    if (!isRecording) return;
 
-      return () => {
-        clearInterval(timer);
-      };
-    }
+    const timer = setInterval(() => setDuration((d) => d + 1), 1000);
+    return () => clearInterval(timer);
   }, [isRecording]);
-
-  console.log(file);
 
   return (
     <div className="h-full flex flex-col justify-center items-center gap-4">
@@ -74,17 +87,17 @@ const NewChat = () => {
       </p>
 
       <p className="flex justify-center items-center gap-2 text-lg font-normal text-slate-600">
-        Record <RxArrowRight className="text-blue-400" /> Transcribe
+        Record <RxArrowRight className="text-blue-400" /> Transcribe{" "}
         <RxArrowRight className="text-blue-400" /> Translate
       </p>
 
       <button
-        onClick={() => (isRecording ? handleStop() : handleRecord())}
+        onClick={isRecording ? handleStop : handleRecord}
         className={`w-xs bg-white shadow-2xl shadow-blue-400/40 rounded-xl flex justify-between items-center py-2 px-4 cursor-pointer my-4 ${
           isRecording && "animate-pulse"
         }`}
       >
-        {isRecording ? "Recording..." : "Record"}
+        {isRecording ? "Recording..." : fileUrl ? "Re-record" : "Record"}
 
         {isRecording ? (
           <div className="flex gap-2">
@@ -106,26 +119,25 @@ const NewChat = () => {
           upload
           <input
             className="hidden"
-            disabled={isRecording}
             type="file"
-            accept=".mp3,.wav"
+            accept=".mp3,.wav,webm"
+            disabled={isRecording}
             onChange={handleFile}
           />
         </label>{" "}
         a mp3 file
       </p>
 
-      {/* {file && (
+      {fileUrl && (
         <MediaThemeTailwindAudio className="w-xs [--media-accent-color:var(--color-blue-400)]">
           <audio
             slot="media"
-            src={URL.createObjectURL(file)}
+            src={fileUrl}
             playsInline
             crossOrigin="anonymous"
-            className=""
-          ></audio>
+          />
         </MediaThemeTailwindAudio>
-      )} */}
+      )}
     </div>
   );
 };

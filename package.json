@@ -22,6 +22,7 @@
   "homepage": "https://github.com/n4ryn/fe-ai-speech#readme",
   "description": "",
   "dependencies": {
+    "@huggingface/transformers": "^3.5.2",
     "@reduxjs/toolkit": "^2.8.2",
     "@tailwindcss/vite": "^4.1.10",
     "axios": "^1.10.0",
