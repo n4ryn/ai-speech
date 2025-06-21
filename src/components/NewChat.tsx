@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import MediaThemeTailwindAudio from "player.style/tailwind-audio/react";
 
 // Components
 import SettingModal from "./SettingModal";
+import AudioPlayer from "./ui/AudioPlayer";
 
 // Types
 import type { RootState } from "../slices/store";
@@ -26,6 +26,11 @@ const NewChat = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [aiResult, setAiResult] = useState<{
+    text: string;
+    chunks: { timestamp: number[]; text: string }[];
+  }>({ text: "", chunks: [{ timestamp: [], text: "" }] });
+  const [isLoading, setIsLoading] = useState(false);
 
   const modalRef = useRef<HTMLDialogElement | null>(null);
   const mediaStream = useRef<MediaStream | null>(null);
@@ -86,9 +91,12 @@ const NewChat = () => {
 
   const handleTranscribe = async () => {
     if (!fileUrl) return;
+    setIsLoading(true);
 
     const transcriber = await speechRecognition(fileUrl, aiModel);
-    console.log(transcriber);
+
+    setAiResult({ text: transcriber.text, chunks: transcriber.chunks });
+    setIsLoading(false);
   };
 
   const handleOpenModal = () => {
@@ -153,21 +161,18 @@ const NewChat = () => {
 
         {fileUrl && (
           <>
-            <MediaThemeTailwindAudio className="w-xs [--media-accent-color:var(--color-blue-400)]">
-              <audio
-                slot="media"
-                src={fileUrl}
-                playsInline
-                crossOrigin="anonymous"
-              />
-            </MediaThemeTailwindAudio>
+            <AudioPlayer audioUrl={fileUrl} mimeType="audio/wav" />
 
             <div className="w-full flex justify-around items-center mt-4">
               <button
                 className="btn bg-blue-400/90 hover:shadow-lg hover:shadow-blue-200 text-white"
                 onClick={handleTranscribe}
+                disabled={isLoading}
               >
                 Transcribe
+                {isLoading && (
+                  <span className="loading loading-spinner loading-xs"></span>
+                )}
               </button>
 
               <RiSettings3Line
@@ -175,6 +180,30 @@ const NewChat = () => {
                 onClick={handleOpenModal}
               />
             </div>
+
+            {!isLoading && aiResult.text && aiResult.chunks.length > 0 && (
+              <div className="md:max-w-2xl">
+                {aiResult.chunks.map((chunk, index) => (
+                  <div
+                    key={index}
+                    className="flex gap-4 bg-blue-200/40 text-md mb-4 p-2 rounded-md shadow-lg shadow-blue-200/20 hover:shadow-blue-200/50 transition-all delay-75 ease-in-out"
+                  >
+                    <p className="font-semibold">
+                      {convertToMinutes(chunk.timestamp[0], false)}
+                    </p>
+                    <p>{chunk.text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {isLoading && (
+              <div className="flex w-full md:w-2xl flex-col gap-4">
+                <div className="skeleton bg-blue-100/60 h-8 w-3/4"></div>
+                <div className="skeleton bg-blue-100/60 h-8 w-full"></div>
+                <div className="skeleton bg-blue-100/60 h-8 w-full"></div>
+              </div>
+            )}
           </>
         )}
       </div>
