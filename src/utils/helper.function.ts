@@ -26,9 +26,12 @@ export const getUser = () => {
 };
 
 // Convert to Minutes
-export const convertToMinutes = (seconds: number) => {
+export const convertToMinutes = (
+  seconds: number,
+  showMinutes: boolean = true
+) => {
   const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
+  const s = Math.floor(seconds % 60);
 
-  return `${m}:${s < 10 ? "0" : ""}${s} min`;
+  return `${m}:${s < 10 ? "0" : ""}${s}` + (showMinutes ? "min" : "");
 };
